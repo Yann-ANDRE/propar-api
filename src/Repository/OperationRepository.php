@@ -19,6 +19,22 @@ class OperationRepository extends ServiceEntityRepository
         parent::__construct($registry, Operation::class);
     }
 
+    public function findEndOperation()
+    {
+        return $this->createQueryBuilder('o')
+                    ->where('o.endDate IS NOT NULL')
+                    ->getQuery()
+                    ->getResult();
+    }
+
+    public function findNowOperation()
+    {
+        return $this->createQueryBuilder('o')
+                    ->where('o.endDate IS NULL')
+                    ->getQuery()
+                    ->getResult();
+    }
+
     // /**
     //  * @return Operation[] Returns an array of Operation objects
     //  */

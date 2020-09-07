@@ -19,24 +19,28 @@ class Worker implements UserInterface
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      * @Groups("worker:read")
+     * @Groups("operation:read")
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=50)
      * @Groups("worker:read")
+     * @Groups("operation:read")
      */
     private $firstname;
 
     /**
      * @ORM\Column(type="string", length=50)
      * @Groups("worker:read")
+     * @Groups("operation:read")
      */
     private $name;
 
     /**
      * @ORM\Column(type="string", length=50)
      * @Groups("worker:read")
+     * @Groups("operation:read")
      */
     private $username;
 
@@ -49,17 +53,20 @@ class Worker implements UserInterface
     /**
      * @ORM\Column(type="string", length=50)
      * @Groups("worker:read")
+     * @Groups("operation:read")
      */
     private $role;
 
     /**
      * @ORM\Column(type="date")
      * @Groups("worker:read")
+     * @Groups("operation:read")
      */
     private $recruitmentDate;
 
     /**
      * @ORM\OneToMany(targetEntity=Operation::class, mappedBy="idWorker")
+     * @Groups("worker:read")
      */
     private $operations;
 

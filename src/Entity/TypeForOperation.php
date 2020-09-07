@@ -6,6 +6,7 @@ use App\Repository\TypeForOperationRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=TypeForOperationRepository::class)
@@ -16,16 +17,22 @@ class TypeForOperation
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups("operation:read")
+     * @Groups("worker:read")
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=50)
+     * @Groups("operation:read")
+     * @Groups("worker:read")
      */
     private $label;
 
     /**
      * @ORM\Column(type="float")
+     * @Groups("operation:read")
+     * @Groups("worker:read")
      */
     private $price;
 

@@ -19,6 +19,14 @@ class WorkerRepository extends ServiceEntityRepository
         parent::__construct($registry, Worker::class);
     }
 
+    public function findAllUsername()
+    {
+        return $this->createQueryBuilder('w')
+                    ->select('w.username')
+                    ->getQuery()
+                    ->getResult();
+    }
+
     // /**
     //  * @return Worker[] Returns an array of Worker objects
     //  */

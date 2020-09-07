@@ -10,23 +10,43 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class OperationController extends AbstractController
 {
-    /**
-     * @Route("/worker", name="worker_get_all", methods={"GET"})
-     * @param WorkerRepository $workerRepository
-     * @return JsonResponse
-     */
-    public function getAllWorkers(WorkerRepository $workerRepository)
-    {
-        return $this->json($workerRepository->findAll(), 200, [], ['groups' => "worker:read"]);
-    }
-
-    /**
-     * @Route("/operation", name="operation_get_all", methods={"GET"})
+     /**
+     * @Route("/operation/list/all", name="operation_list_all", methods={"GET"})
      * @param OperationRepository $operationRepository
      * @return JsonResponse
      */
     public function getAllOperation(OperationRepository $operationRepository)
     {
-        return $this->json($operationRepository->findAll(), 200, [], ['groups' => 'operation:read']);
+        return $this->json($operationRepository->findAll(), 200, ['Access-Control-Allow-Origin' => '*'], ['groups' => 'operation:read']);
+    }
+
+    /**
+     * @Route("/operation/list/end", name="operation_list_end", methods={"GET"})
+     * @param OperationRepository $operationRepository
+     * @return JsonResponse
+     */
+    public function getEndOperation(OperationRepository $operationRepository){
+        return $this->json($operationRepository->findEndOperation(), 200, ['Access-Control-Allow-Origin' => '*'], ['groups' => 'operation:read']);
+    }
+
+    /**
+     * @Route("/operation/list/now", name="operation_list_now", methods={"GET"})
+     * @param OperationRepository $operationRepository
+     * @return JsonResponse
+     */
+    public function getNowOperation(OperationRepository $operationRepository)
+    {
+        return $this->json($operationRepository->findNowOperation(), 200, ['Access-Control-Allow-Origin' => '*'], ['groups' => 'operation:read']);
+    }
+
+    /**
+     * @Route("/operation/get/{id}", name="operation_get_id", methods={"GET"})
+     * @param $id
+     * @param OperationRepository $operationRepository
+     * @return JsonResponse
+     */
+    public function getOperationById($id, OperationRepository $operationRepository)
+    {
+        return $this->json($operationRepository->find($id), 200, ['Access-Control-Allow-Origin' => '*'], ['groups' => 'operation:read']);
     }
 }

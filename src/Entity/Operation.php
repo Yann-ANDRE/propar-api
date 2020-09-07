@@ -16,40 +16,49 @@ class Operation
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      * @Groups("operation:read")
+     * @Groups("worker:read")
      */
     public $id;
 
     /**
      * @ORM\Column(type="date")
      * @Groups("operation:read")
+     * @Groups("worker:read")
      */
     public $startDate;
 
     /**
      * @ORM\Column(type="date", nullable=true)
      * @Groups("operation:read")
+     * @Groups("worker:read")
      */
     private $endDate;
 
     /**
      * @ORM\Column(type="text")
      * @Groups("operation:read")
+     * @Groups("worker:read")
      */
     private $comment;
 
     /**
      * @ORM\ManyToOne(targetEntity=Worker::class, inversedBy="operations")
+     * @Groups("operation:read")
      */
     private $idWorker;
 
     /**
      * @ORM\ManyToOne(targetEntity=Customer::class, inversedBy="operations")
+     * @Groups("operation:read")
+     * @Groups("worker:read")
      * @ORM\JoinColumn(nullable=false)
      */
     private $idCustomer;
 
     /**
      * @ORM\ManyToOne(targetEntity=TypeForOperation::class, inversedBy="operations")
+     * @Groups("operation:read")
+     * @Groups("worker:read")
      * @ORM\JoinColumn(nullable=false)
      */
     private $idOperationType;
