@@ -185,7 +185,7 @@ class Worker implements UserInterface
 
     public function getRoles()
     {
-        // TODO: Implement getRoles() method.
+        return ['ROLE_USER'];
     }
 
     public function getSalt()
