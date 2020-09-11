@@ -8,6 +8,7 @@ use App\Repository\OperationRepository;
 use App\Repository\TypeForOperationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -49,6 +50,7 @@ class OperationController extends AbstractController
      * @param $id
      * @param OperationRepository $operationRepository
      * @return JsonResponse
+     * @IsGranted("ROLE_USER")
      */
     public function getOperationById($id, OperationRepository $operationRepository)
     {
@@ -60,6 +62,7 @@ class OperationController extends AbstractController
      * @param $id
      * @param OperationRepository $operationRepository
      * @return JsonResponse
+     * @IsGranted("ROLE_USER")
      */
     public function endOperation($id, OperationRepository $operationRepository){
         $operationRepository->endOperation($id);
@@ -72,6 +75,7 @@ class OperationController extends AbstractController
      * @param $id_op
      * @param OperationRepository $operationRepository
      * @return JsonResponse
+     * @IsGranted("ROLE_USER")
      */
     public function takeOperation($id_worker, $id_op, OperationRepository $operationRepository){
         $operationRepository->takeOperation($id_worker, $id_op);
@@ -83,6 +87,7 @@ class OperationController extends AbstractController
      * @param $id
      * @param OperationRepository $operationRepository
      * @return JsonResponse
+     * @IsGranted("ROLE_USER")
      */
     public function getNowOperationForWorker($id, OperationRepository $operationRepository){
         return $this->json($operationRepository->getNowOperationForWorker($id), 200, [], ['groups' => 'operation:read']);
@@ -93,6 +98,7 @@ class OperationController extends AbstractController
      * @Route("/api/get_free_operation", name="get_free_operation", methods={"GET"})
      * @param OperationRepository $operationRepository
      * @return JsonResponse
+     * @IsGranted("ROLE_USER")
      */
     public function getFreeOperation(OperationRepository $operationRepository){
         return $this->json($operationRepository->getFreeOperation(), 200, [], ['groups' => 'operation:read']);
@@ -105,6 +111,7 @@ class OperationController extends AbstractController
      * @param TypeForOperationRepository $typeForOperationRepository
      * @return JsonResponse
      * @throws Exception
+     * @IsGranted("ROLE_USER")
      */
     public function addOperation(Request $request, EntityManagerInterface $entityManager, TypeForOperationRepository $typeForOperationRepository){
         $customerFirstname = $request->get('customerFirstname');
@@ -113,27 +120,38 @@ class OperationController extends AbstractController
         $startDate = $request->get('startDate');
         $comment = $request->get('comment');
         $typeOp = $request->get('typeOp');
-        $op = new Operation();
-        $customer = new Customer();
+        if (
+            isset($customerFirstname) && !empty($customerFirstname) &&
+            isset($customerName) && !empty($customerName) &&
+            isset($customerPhone) && !empty($customerPhone) &&
+            isset($startDate) && !empty($startDate) &&
+            isset($comment) && !empty($comment) &&
+            isset($typeOp) && !empty($typeOp)
+        ){
+            $op = new Operation();
+            $customer = new Customer();
 
-        $customer->setFirstname($customerFirstname);
-        $customer->setName($customerName);
-        $customer->setPhone($customerPhone);
+            $customer->setFirstname($customerFirstname);
+            $customer->setName($customerName);
+            $customer->setPhone($customerPhone);
 
-        $entityManager->persist($customer);
-        $entityManager->flush();
+            $entityManager->persist($customer);
+            $entityManager->flush();
 
-        $opType = $typeForOperationRepository->findOneBy(['label' => $typeOp]);
+            $opType = $typeForOperationRepository->findOneBy(['label' => $typeOp]);
 
-        $op->setIdCustomer($customer);
-        $op->setStartDate(new \DateTime($startDate, new \DateTimeZone('Europe/Paris')));
-        $op->setComment($comment);
-        $op->setIdOperationType($opType);
+            $op->setIdCustomer($customer);
+            $op->setStartDate(new \DateTime($startDate, new \DateTimeZone('Europe/Paris')));
+            $op->setComment($comment);
+            $op->setIdOperationType($opType);
 
-        $entityManager->persist($op);
+            $entityManager->persist($op);
 
-        $entityManager->flush();
+            $entityManager->flush();
 
-        return $this->json(['result' => true]);
+            return $this->json(['result' => true]);
+        } else {
+            return $this->json(['result' => false]);
+        }
     }
 }
