@@ -23,6 +23,7 @@ class OperationRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('o')
                     ->where('o.endDate IS NOT NULL')
+                    ->andWhere('o.idWorker IS NOT NULL')
                     ->getQuery()
                     ->getResult();
     }
@@ -31,6 +32,45 @@ class OperationRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('o')
                     ->where('o.endDate IS NULL')
+                    ->andWhere('o.idWorker IS NOT NULL')
+                    ->getQuery()
+                    ->getResult();
+    }
+
+    public function endOperation($id){
+        return $this->createQueryBuilder('o')
+                    ->update()
+                    ->set('o.endDate', ':endDate')
+                    ->where('o.id = :id')
+                    ->setParameter('id', $id)
+                    ->setParameter('endDate', new \DateTime(null, new \DateTimeZone('Europe/Paris')))
+                    ->getQuery()
+                    ->getResult();
+    }
+
+    public function takeOperation($idWorker, $idOp){
+        return $this->createQueryBuilder('o')
+                    ->update()
+                    ->set('o.idWorker', ':idWorker')
+                    ->where('o.id = :idOp')
+                    ->setParameter('idWorker', $idWorker)
+                    ->setParameter('idOp', $idOp)
+                    ->getQuery()
+                    ->getResult();
+    }
+
+    public function getNowOperationForWorker($id){
+        return $this->createQueryBuilder('o')
+                    ->where('o.endDate IS NULL')
+                    ->andWhere('o.idWorker = :idWorker')
+                    ->setParameter('idWorker', $id)
+                    ->getQuery()
+                    ->getResult();
+    }
+
+    public function getFreeOperation(){
+        return $this->createQueryBuilder('o')
+                    ->where('o.idWorker IS NULL')
                     ->getQuery()
                     ->getResult();
     }

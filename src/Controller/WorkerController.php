@@ -25,49 +25,54 @@ class WorkerController extends AbstractController
     }
 
     /**
-     * @Route("/worker/get/username", name="worker_get_username", methods={"GET"})
-     * @param WorkerRepository $workerRepository
+     * @Route("/api/worker/get", name="api_worker_get", methods={"GET"})
      * @return JsonResponse
      */
-    public function getWorkerUsername(WorkerRepository $workerRepository)
-    {
-        return $this->json($workerRepository->findAllUsername(),200, [], ['groups' => 'worker:read']);
+    public function getWorker(){
+        return $this->json($this->getUser(), 200, [], ['groups' => 'worker:read']);
     }
 
     /**
-     * @Route("/worker/get/{id}", name="worker_get_byId", methods={"GET"})
-     * @param $id
-     * @param WorkerRepository $workerRepository
-     * @return JsonResponse
-     */
-    public function getWorkerById($id, WorkerRepository $workerRepository)
-    {
-        return $this->json($workerRepository->find($id), 200, [], ['groups' => 'worker:read']);
-    }
-
-    /**
-     * @Route("/worker/add", name="worker_add", methods={"POST"})
+     * @Route("/api/worker/add", name="api_worker_add", methods={"POST"})
      * @param Request $request
-     * @param EntityManagerInterface $em
+     * @param EntityManagerInterface $entityManager
      * @param UserPasswordEncoderInterface $encoder
      * @return JsonResponse
      * @throws Exception
      */
-    public function createWorker(Request $request, EntityManagerInterface $em, UserPasswordEncoderInterface $encoder)
-    {
-        $worker = new Worker();
-        $worker->setFirstname($request->query->get('firstname'));
-        $worker->setName($request->query->get('name'));
-        $worker->setUsername($request->query->get('username'));
-        $worker->setPassword($encoder->encodePassword($worker, $request->query->get('password')));
-        $worker->setRole($request->query->get('role'));
-        $worker->setRecruitmentDate(new \DateTime(null, new \DateTimeZone('Europe/Paris')));
+    public function addWorker(Request $request, EntityManagerInterface $entityManager, UserPasswordEncoderInterface $encoder){
+        $workerFirstname = $request->get('workerFirstname');
+        $workerName = $request->get('workerName');
+        $workerUsername = $request->get('workerUsername');
+        $workerPassword = $request->get('workerPassword');
+        $workerPasswordConfirm = $request->get('workerPasswordConfirm');
+        $workerRole = $request->get('workerRole');
 
-        $em->persist($worker);
+        if (
+            isset($workerFirstname) && !empty($workerFirstname) &&
+            isset($workerName) && !empty($workerName) &&
+            isset($workerUsername) && !empty($workerUsername) &&
+            isset($workerPassword) && !empty($workerPassword) &&
+            isset($workerPasswordConfirm) && !empty($workerPasswordConfirm) &&
+            isset($workerRole) && !empty($workerRole) &&
+            $workerPassword == $workerPasswordConfirm
+        ){
+            $worker = new Worker();
 
-        $em->flush();
+            $worker->setFirstname($workerFirstname);
+            $worker->setName($workerName);
+            $worker->setUsername($workerUsername);
+            $worker->setPassword($encoder->encodePassword($worker, $workerPassword));
+            $worker->setRole($workerRole);
+            $worker->setRecruitmentDate(new \DateTime(null, new \DateTimeZone('Europe/Paris')));
 
-        return $this->json(['message' => 'Employé ajouté'], 201);
+            $entityManager->persist($worker);
+            $entityManager->flush();
+
+            return $this->json(['result' => true]);
+        } else {
+            return $this->json(['result' => false]);
+        }
     }
 
 }

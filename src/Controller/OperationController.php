@@ -2,10 +2,15 @@
 
 namespace App\Controller;
 
+use App\Entity\Customer;
+use App\Entity\Operation;
 use App\Repository\OperationRepository;
-use App\Repository\WorkerRepository;
+use App\Repository\TypeForOperationRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 class OperationController extends AbstractController
@@ -40,7 +45,7 @@ class OperationController extends AbstractController
     }
 
     /**
-     * @Route("/operation/get/{id}", name="operation_get_id", methods={"GET"})
+     * @Route("/api/operation/get/{id}", name="operation_get_id", methods={"GET"})
      * @param $id
      * @param OperationRepository $operationRepository
      * @return JsonResponse
@@ -48,5 +53,87 @@ class OperationController extends AbstractController
     public function getOperationById($id, OperationRepository $operationRepository)
     {
         return $this->json($operationRepository->find($id), 200, ['Access-Control-Allow-Origin' => '*'], ['groups' => 'operation:read']);
+    }
+
+    /**
+     * @Route("/api/end_operation/{id}", name="api_end_operation", methods={"POST"})
+     * @param $id
+     * @param OperationRepository $operationRepository
+     * @return JsonResponse
+     */
+    public function endOperation($id, OperationRepository $operationRepository){
+        $operationRepository->endOperation($id);
+        return $this->json(['result' => true]);
+    }
+
+    /**
+     * @Route("/api/take_operation/{id_worker}/{id_op}", name="api_take_operation", methods={"POST"})
+     * @param $id_worker
+     * @param $id_op
+     * @param OperationRepository $operationRepository
+     * @return JsonResponse
+     */
+    public function takeOperation($id_worker, $id_op, OperationRepository $operationRepository){
+        $operationRepository->takeOperation($id_worker, $id_op);
+        return $this->json(['result' => true]);
+    }
+
+    /**
+     * @Route("/api/now_operation_for_worker/{id}", name="now_operation_for_worker", methods={"GET"})
+     * @param $id
+     * @param OperationRepository $operationRepository
+     * @return JsonResponse
+     */
+    public function getNowOperationForWorker($id, OperationRepository $operationRepository){
+        return $this->json($operationRepository->getNowOperationForWorker($id), 200, [], ['groups' => 'operation:read']);
+    }
+
+
+    /**
+     * @Route("/api/get_free_operation", name="get_free_operation", methods={"GET"})
+     * @param OperationRepository $operationRepository
+     * @return JsonResponse
+     */
+    public function getFreeOperation(OperationRepository $operationRepository){
+        return $this->json($operationRepository->getFreeOperation(), 200, [], ['groups' => 'operation:read']);
+    }
+
+    /**
+     * @Route("/api/operation/add", name="api_add_operation", methods={"POST"})
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @param TypeForOperationRepository $typeForOperationRepository
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function addOperation(Request $request, EntityManagerInterface $entityManager, TypeForOperationRepository $typeForOperationRepository){
+        $customerFirstname = $request->get('customerFirstname');
+        $customerName = $request->get('customerName');
+        $customerPhone = $request->get('customerPhone');
+        $startDate = $request->get('startDate');
+        $comment = $request->get('comment');
+        $typeOp = $request->get('typeOp');
+        $op = new Operation();
+        $customer = new Customer();
+
+        $customer->setFirstname($customerFirstname);
+        $customer->setName($customerName);
+        $customer->setPhone($customerPhone);
+
+        $entityManager->persist($customer);
+        $entityManager->flush();
+
+        $opType = $typeForOperationRepository->findOneBy(['label' => $typeOp]);
+
+        $op->setIdCustomer($customer);
+        $op->setStartDate(new \DateTime($startDate, new \DateTimeZone('Europe/Paris')));
+        $op->setComment($comment);
+        $op->setIdOperationType($opType);
+
+        $entityManager->persist($op);
+
+        $entityManager->flush();
+
+        return $this->json(['result' => true]);
     }
 }

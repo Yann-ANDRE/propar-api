@@ -70,6 +70,8 @@ class Worker implements UserInterface
      */
     private $operations;
 
+    private $apiToken;
+
     public function __construct()
     {
         $this->operations = new ArrayCollection();
@@ -196,5 +198,13 @@ class Worker implements UserInterface
     public function eraseCredentials()
     {
         // TODO: Implement eraseCredentials() method.
+    }
+
+    /**
+     * @param mixed $apiToken
+     */
+    public function setApiToken($apiToken): void
+    {
+        $this->apiToken = $apiToken;
     }
 }
